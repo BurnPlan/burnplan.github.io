@@ -4,3 +4,5 @@
 /* Keep the map inside its grid column at intermediate viewport widths. */
 .map{width:100%;aspect-ratio:auto;height:clamp(420px,42vw,640px)}
 @media(max-width:760px){.map{height:400px;min-height:0}}
+
+.contact-info{padding:0 0 18px;color:var(--ink);font-size:12px;line-height:1.8}.contact-info strong{font-weight:600}.contact-info a{color:var(--green);text-underline-offset:3px;overflow-wrap:anywhere}
