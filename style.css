@@ -6,3 +6,5 @@
 @media(max-width:760px){.map{height:400px;min-height:0}}
 
 .contact-info{padding:0 0 18px;color:var(--ink);font-size:12px;line-height:1.8}.contact-info strong{font-weight:600}.contact-info a{color:var(--green);text-underline-offset:3px;overflow-wrap:anywhere}
+
+.wordmark .title-demo{letter-spacing:0;font-size:10px;text-transform:none;line-height:1.3;color:#788268}.about-demo{display:block;font-size:12px;font-weight:400;letter-spacing:0;margin-top:6px}
