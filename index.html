@@ -50,6 +50,10 @@
           <div id="submit-error" class="inline-error" role="alert" hidden></div>
         </section>
       </form>
+      <section class="contact-panel" aria-label="Contact information">
+        <h2>If you have any questions or suggestions, please contact:</h2>
+        <address><strong>Jia Yang (<a href="mailto:jia.yang11@okstate.edu">jia.yang11@okstate.edu</a>)</strong><br><span>Department of Natural Resource Ecology and Management<br>Oklahoma State University</span></address>
+      </section>
     </aside>
     <section class="map-panel" aria-label="Oklahoma county map and polygon drawing workspace">
       <div id="map" aria-label="Interactive Oklahoma map"></div>
@@ -61,10 +65,16 @@
       <div class="map-footer"><span id="map-coordinates">36.000° N, 98.000° W</span><span>Scroll to zoom · drag to explore</span></div>
     </section>
   </main>
-  <section id="jobs-view" class="jobs-view" hidden><div class="jobs-header"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>My simulations</h1><p>Track requests from submission to results. All times are Central.</p></div><div class="jobs-actions"><button id="refresh-jobs" class="button secondary">↻ Refresh</button><button id="new-plan" class="button primary">＋ New simulation</button></div></div><p id="jobs-status" class="field-help" role="status"></p><div id="jobs-list"></div></section>
+  <section id="jobs-view" class="jobs-view" hidden><div class="jobs-header"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>My simulations</h1><p>Track requests from submission to results. All times are Central.</p></div><div class="jobs-actions"><button id="refresh-jobs" class="button secondary">↻ Refresh</button><button id="new-plan" class="button primary">＋ New simulation</button></div></div><p id="jobs-status" class="field-help" role="status"></p><div id="jobs-list"></div>
+      <section class="contact-panel" aria-label="Contact information">
+        <h2>If you have any questions or suggestions, please contact:</h2>
+        <address><strong>Jia Yang (<a href="mailto:jia.yang11@okstate.edu">jia.yang11@okstate.edu</a>)</strong><br><span>Department of Natural Resource Ecology and Management<br>Oklahoma State University</span></address>
+      </section>
+</section>
   <dialog id="auth-dialog" aria-labelledby="auth-title"><button type="button" id="close-auth" class="close-dialog" aria-label="Close sign-in">×</button><span class="eyebrow">WELCOME TO OKBURNPLAN</span><h2 id="auth-title">Sign in to your workspace</h2><p>Save your simulation domains and track your requests.</p><form id="auth-form"><label for="email">Email address</label><input type="email" id="email" autocomplete="username" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" required minlength="6"><button id="login-button" class="button primary" type="submit">Sign in →</button><p id="auth-error" class="inline-error" role="alert" hidden></p></form><p class="field-help">Sign in with an account provided by the project administrator.</p></dialog>
   <dialog id="account-dialog" aria-labelledby="account-title"><button class="close-dialog" id="close-account" aria-label="Close account">×</button><span class="eyebrow">YOUR ACCOUNT</span><h2 id="account-title">Signed in</h2><p id="account-email"></p><button id="signout-button" class="button secondary">Sign out</button></dialog>
   <dialog id="results-dialog" class="results-dialog" aria-label="Simulation results"><button type="button" id="close-results" class="close-dialog" aria-label="Close results">×</button><div id="results-content"></div></dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script src="vendor/leaflet.js"></script><script src="vendor/leaflet.draw.js"></script><script src="vendor/turf.min.js"></script><script src="vendor/proj4.js"></script><script src="vendor/supabase.js"></script><script src="config.js"></script><script type="module" src="app.mjs"></script>
 </body>
