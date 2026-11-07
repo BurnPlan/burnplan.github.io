@@ -181,12 +181,12 @@ async function loadMapData() {
     const [countiesResponse, outlineResponse] = await Promise.all([fetch('data/oklahoma-counties.geojson'), fetch('data/oklahoma.geojson')]);
     if (!countiesResponse.ok || !outlineResponse.ok) throw new Error('Boundary download failed.');
     [state.counties, state.outline] = await Promise.all([countiesResponse.json(), outlineResponse.json()]);
-    L.geoJSON(state.counties, { style: { color: '#829174', weight: 1, fillColor: '#dce3c6', fillOpacity: 0.24 },
+    L.geoJSON(state.counties, { style: { color: '#2878c8', weight: 1, fillOpacity: 0 },
       onEachFeature(feature, layer) {
         countyLayers.set(feature.properties.geoid, layer);
         layer.bindTooltip(feature.properties.name, { permanent: true, direction: 'center', className: 'county-label', interactive: false });
-        layer.on('mouseover', () => { if (!state.drawing && !state.editing) layer.setStyle({ fillOpacity: 0.48, weight: 2 }); });
-        layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.24, weight: 1 }));
+        layer.on('mouseover', () => { if (!state.drawing && !state.editing) layer.setStyle({ fillOpacity: 0, weight: 2 }); });
+        layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0, weight: 1 }));
         layer.on('click', () => {
           if (state.drawing || state.editing) return;
           $('county-select').value = feature.properties.geoid;
