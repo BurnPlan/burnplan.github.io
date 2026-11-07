@@ -365,6 +365,10 @@ $('simulation-form').addEventListener('submit', async event => {
     counties: state.countyNames, app: 'OKBurnPlan', request_version: 2,
     ignition: structuredClone(state.ignition) };
   try {
+    const { count, error: countError } = await client.from('simulation_jobs')
+      .select('id', { count: 'exact', head: true }).eq('user_id', state.user.id);
+    if (countError || count === null) throw new Error('SIMULATION_COUNT_UNAVAILABLE');
+    if (count >= 5) throw new Error('SIMULATION_LIMIT_REACHED');
     const { error } = await client.from('simulation_jobs').insert({ id: requestId, user_id: state.user.id,
       name: $('simulation-name').value.trim(), area_geojson: feature,
       simulation_start: period.start.toUTC().toISO(), simulation_end: period.end.toUTC().toISO(), status: 'queued' });
@@ -372,8 +376,14 @@ $('simulation-form').addEventListener('submit', async event => {
     clearDomain();
     $('simulation-name').value = '';
     notice('Simulation request saved and queued.'); await refreshJobs(); setView('jobs');
-  } catch {
-    errorAt('submit-error', `Could not confirm submission. Check My simulations before retrying to avoid duplicates. Request ID: ${requestId}`);
+  } catch (error) {
+    if (error.message?.includes('SIMULATION_LIMIT_REACHED')) {
+      errorAt('submit-error', 'You can keep at most 5 simulations. Delete a completed or failed simulation in My simulations before submitting another.');
+    } else if (error.message === 'SIMULATION_COUNT_UNAVAILABLE') {
+      errorAt('submit-error', 'Could not check your simulation limit. Check your connection and try again. No request was submitted.');
+    } else {
+      errorAt('submit-error', `Could not confirm submission. Check My simulations before retrying to avoid duplicates. Request ID: ${requestId}`);
+    }
   } finally { state.submitting = false; updateReview(); }
 });
 $('draw-button').onclick = () => {
