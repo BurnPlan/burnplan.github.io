@@ -47,6 +47,7 @@
           <div id="review-summary" class="review-summary">Draw a domain and choose a period to review your request.</div>
           <button type="submit" id="submit-button" class="button submit-button">Sign in to submit <span>→</span></button>
           <p class="field-help submit-help">You can keep up to 5 simulations, including queued, running, completed, and failed requests. Delete a completed or failed simulation in My simulations to make room for another. You can submit up to 20 simulations per day, including reruns. The daily limit resets at midnight Central Time; deleting a simulation does not reset it.</p>
+          <p class="daily-usage" role="status" aria-live="polite">Sign in to see your daily submissions and remaining allowance.</p>
           <div id="submit-error" class="inline-error" role="alert" hidden></div>
         </section>
       </form>
@@ -65,7 +66,7 @@
       <div class="map-footer"><span id="map-coordinates">36.000° N, 98.000° W</span><span>Scroll to zoom · drag to explore</span></div>
     </section>
   </main>
-  <section id="jobs-view" class="jobs-view" hidden><div class="jobs-header"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>My simulations</h1><p>Track requests from submission to results. All times are Central.</p></div><div class="jobs-actions"><button id="refresh-jobs" class="button secondary">↻ Refresh</button><button id="new-plan" class="button primary">＋ New simulation</button></div></div><p id="jobs-status" class="field-help" role="status"></p><div id="jobs-list"></div>
+  <section id="jobs-view" class="jobs-view" hidden><div class="jobs-header"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>My simulations</h1><p>Track requests from submission to results. All times are Central.</p></div><div class="jobs-actions"><button id="refresh-jobs" class="button secondary">↻ Refresh</button><button id="new-plan" class="button primary">＋ New simulation</button></div></div><p id="jobs-status" class="field-help" role="status"></p><p class="daily-usage" role="status" aria-live="polite">Sign in to see your daily submissions and remaining allowance.</p><div id="jobs-list"></div>
       <section class="contact-panel" aria-label="Contact information">
         <h2>If you have any questions or suggestions, please contact:</h2>
         <address><strong>Jia Yang (<a href="mailto:jia.yang11@okstate.edu">jia.yang11@okstate.edu</a>)</strong><br><span>Department of Natural Resource Ecology and Management<br>Oklahoma State University</span></address>

@@ -25,3 +25,5 @@
 
 
 .contact-panel{margin:24px 0;padding:20px 0;border-top:1px solid var(--line)}.contact-panel h2{margin:0 0 10px;font-size:12px;color:var(--ink);font-weight:700}.contact-panel address{font-style:normal;font-size:12px;line-height:1.8;color:var(--muted)}.contact-panel address strong{color:var(--ink);font-weight:600}.contact-panel a{color:var(--ink);text-underline-offset:3px;overflow-wrap:anywhere}.contact-panel address span{display:inline-block;margin-top:6px}.jobs-view>.contact-panel{margin-top:36px}
+
+.daily-usage{padding:12px 14px;border:1px solid var(--line);border-radius:7px;background:#eef2e6;color:var(--ink);font-size:12px;line-height:1.7}

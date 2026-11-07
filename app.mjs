@@ -2,6 +2,7 @@ import { DateTime, ZONE, centralNow, limits, localFormat, choices, resolveLocal,
 import { validateIgnition, ignitionDescription } from './ignition-utils.mjs';
 import { createResultsViewer } from './results-view.mjs';
 import { addFuelLayer } from './fuel-layer.mjs';
+import { dailyUsageText } from './daily-usage.mjs';
 
 const $ = id => document.getElementById(id);
 const state = { user: null, domain: null, countyNames: [], counties: null, outline: null,
@@ -34,6 +35,25 @@ function notice(message) {
 }
 function errorAt(id, message = '') { $(id).textContent = message; $(id).hidden = !message; }
 function openSignIn() { $('auth-dialog').showModal(); setTimeout(() => $('email').focus(), 50); }
+let dailyUsageRequest = 0;
+function showDailyUsage(text) {
+  for (const node of document.querySelectorAll('.daily-usage')) {
+    if (node.textContent !== text) node.textContent = text;
+  }
+}
+async function refreshDailyUsage() {
+  const request = ++dailyUsageRequest, userId = state.user?.id;
+  if (!userId) { showDailyUsage('Sign in to see today’s submissions and remaining daily allowance.'); return; }
+  try {
+    const { data, error } = await client.rpc('burnplan_my_daily_usage');
+    if (error) throw error;
+    if (request !== dailyUsageRequest || state.user?.id !== userId) return;
+    showDailyUsage(dailyUsageText(data));
+  } catch {
+    if (request === dailyUsageRequest && state.user?.id === userId)
+      showDailyUsage('Daily allowance unavailable. Refresh or try again later.');
+  }
+}
 function setView(view) {
   const isJobs = view === 'jobs'; $('planner').hidden = isJobs; $('jobs-view').hidden = !isJobs;
   for (const [id, selected] of [['planner-tab', !isJobs], ['jobs-tab', isJobs]]) {
@@ -206,6 +226,8 @@ async function loadMapData() {
 }
 
 function updateAccount() {
+  ++dailyUsageRequest;
+  showDailyUsage(state.user ? 'Loading today’s submission allowance…' : 'Sign in to see today’s submissions and remaining daily allowance.');
   $('account-button').textContent = state.user ? 'My account ↗' : 'Sign in ↗';
   $('account-email').textContent = state.user?.email || '';
   $('password').value = '';
@@ -317,6 +339,7 @@ function renderJobs() {
   }
 }
 async function refreshJobs() {
+  refreshDailyUsage();
   if (!state.user) { renderJobs(); return; }
   if (state.loadingJobs) return;
   state.loadingJobs = true; const userId = state.user.id;
@@ -387,7 +410,7 @@ $('simulation-form').addEventListener('submit', async event => {
     } else {
       errorAt('submit-error', `Could not confirm submission. Check My simulations before retrying to avoid duplicates. Request ID: ${requestId}`);
     }
-  } finally { state.submitting = false; updateReview(); }
+  } finally { state.submitting = false; updateReview(); refreshDailyUsage(); }
 });
 $('draw-button').onclick = () => {
   if (!state.outline) { notice('Wait for the county map to finish loading.'); return; }
@@ -480,7 +503,8 @@ client.auth.onAuthStateChange((_event, session) => {
   state.user = session?.user || null; updateAccount();
   setTimeout(() => { setupRealtime(); if (state.user) refreshJobs(); }, 0);
 });
-setInterval(() => { updatePeriod(); if (!$('jobs-view').hidden && state.user) refreshJobs(); }, 20000);
+setInterval(() => { updatePeriod(); if (state.user) { if (!$('jobs-view').hidden) refreshJobs(); else refreshDailyUsage(); } }, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDailyUsage(); });
 window.addEventListener('online', () => { notice('Connection restored.'); refreshJobs(); });
 window.addEventListener('offline', () => notice('You are offline. Your current domain stays on screen; reconnect before submitting.'));
 new ResizeObserver(() => {
