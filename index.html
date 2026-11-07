@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Draw an Oklahoma burn simulation domain and submit a simulation period in Central Time.">
-  <title>OKBurnPlan · Prescribed burn workspace</title>
+  <meta name="description" content="Plan prescribed burns in Oklahoma with OKBurnPlan. Explore hourly weather, fuel moisture, fire danger, and simulated fire spread for your selected burn area.">
+  <title>OKBurnPlan | Oklahoma Prescribed Burn Planning</title>
+  <link rel="canonical" href="https://burnplan.github.io/">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="vendor/leaflet.css"><link rel="stylesheet" href="vendor/leaflet.draw.css">
   <link rel="stylesheet" href="styles.css">
@@ -18,7 +19,7 @@
   <div class="contextbar"><span><i class="dot"></i> Oklahoma <span class="muted">/</span> 77 counties</span><span id="central-clock">Central Time · CDT / CST</span></div>
   <main id="planner" class="workspace">
     <aside class="sidebar">
-      <div class="intro"><span class="eyebrow">A BETTER PLAN STARTS HERE</span><h1>Define your burn.</h1><p>Choose a place and time.<br>Keep the whole picture in view.</p></div>
+      <div class="intro"><span class="eyebrow">OKLAHOMA PRESCRIBED BURN PLANNING</span><h1>Define your burn.</h1><p>OKBurnPlan supports prescribed burn planning in Oklahoma. Draw your burn area, select an ignition and time period, and explore hourly weather, fuel moisture, fire danger, and simulated fire spread to compare potential burn windows.</p></div>
       <form id="simulation-form" novalidate>
         <section class="step"><div class="section-heading"><span class="step-number">01</span><h2>Simulation domain</h2><span class="step-tag" id="domain-tag">Required</span></div>
           <label for="county-select">Find an Oklahoma county</label><select id="county-select"><option value="">All Oklahoma counties</option></select>
@@ -41,7 +42,6 @@
           <p class="field-help">Central Time automatically follows CDT (UTC−5) or CST (UTC−6), even if you are in another time zone.</p>
           <div class="period-summary"><span id="period-kind">Forecast</span><strong id="period-duration">—</strong></div>
           <p id="range-label" class="range-label"></p><div id="time-error" class="inline-error" role="alert" hidden></div>
-          <details class="weather-note"><summary>About the HRRR weather window <span>↗</span></summary><p>HRRR forecasts extend to 48 hours from the 00, 06, 12 and 18 UTC runs; other runs extend to 18 hours. The latest published run may cover less than 48 hours from now.</p><p>Past dates require archived weather. Weather availability is checked before a simulation starts.</p><a href="https://www.nco.ncep.noaa.gov/pmb/products/hrrr/" target="_blank" rel="noopener noreferrer">NOAA HRRR documentation ↗</a></details>
         </section>
         <section class="step last-step"><div class="section-heading"><span class="step-number">04</span><h2>Save your request</h2></div><label for="simulation-name">Simulation name</label><input id="simulation-name" maxlength="120" placeholder="e.g. North pasture · morning burn" required>
           <div id="review-summary" class="review-summary">Draw a domain and choose a period to review your request.</div>
