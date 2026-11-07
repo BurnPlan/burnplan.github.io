@@ -288,21 +288,26 @@ function renderJobs() {
       if(job.updated_at&&Date.now()-Date.parse(job.updated_at)>180000)main.append(textElement('p','Waiting for a progress update.','field-help'));
     }
     if (job.error_message) main.append(textElement('p', job.error_message, 'inline-error'));
+    const actions = document.createElement('div'); actions.className = 'job-card-actions';
+    const manage = document.createElement('div'); manage.className = 'job-manage-actions';
     if (job.status === 'completed') {
       main.append(textElement('p',job.result_path?'Simulation complete — results are ready.':'Completed locally; results have not been uploaded.'));
-      if(job.result_path){const results=textElement('button','View results ↗','button primary');results.onclick=()=>resultsViewer.open(job,state.user.id);main.append(results);}
+      if(job.result_path){const results=textElement('button','View results ↗','button primary');results.onclick=()=>resultsViewer.open(job,state.user.id);actions.append(results);}
       const rerun=textElement('button',rerunningJobs.has(job.id)?'Submitting rerun…':'Rerun simulation','button secondary');
       rerun.type='button';rerun.disabled=rerunningJobs.has(job.id)||removingJobs.has(job.id);
-      rerun.setAttribute('aria-label',`Rerun simulation ${job.name}`);rerun.onclick=()=>rerunJob(job);main.append(rerun);
+      rerun.setAttribute('aria-label',`Rerun simulation ${job.name}`);rerun.onclick=()=>rerunJob(job);manage.append(rerun);
     }
     if (['completed','failed'].includes(job.status)) {
       const remove = textElement('button', removingJobs.has(job.id) ? 'Removing…' : 'Remove simulation', 'button secondary');
       remove.type = 'button'; remove.disabled = removingJobs.has(job.id)||rerunningJobs.has(job.id);
       remove.setAttribute('aria-label', `Remove simulation ${job.name}`);
-      remove.onclick = () => removeJob(job); main.append(remove);
+      remove.onclick = () => removeJob(job); manage.append(remove);
     }
     const status = textElement('span', job.status, 'status ' + (['queued','running','completed','failed'].includes(job.status) ? job.status : ''));
-    card.append(main, status); $('jobs-list').append(card);
+    card.append(main, status);
+    if(manage.childElementCount) actions.append(manage);
+    if(actions.childElementCount) card.append(actions);
+    $('jobs-list').append(card);
   }
 }
 async function refreshJobs() {
