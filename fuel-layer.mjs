@@ -14,11 +14,11 @@ export async function addFuelLayer(map, checkbox, notice) {
   legend.onAdd=()=>{
     const box=L.DomUtil.create('div','fuel-legend');
     const title=document.createElement('strong');title.textContent='Model fuel classes';box.append(title);
-    for(const [id,label] of [[0,'Nonburnable (includes agriculture)'],[1,'V · Grass'],[2,'W · Grass / shrub'],[3,'X · Brush'],[4,'Y · Timber'],[5,'Z · Slash / blowdown']]){
+    for(const [id,label] of [[0,'Nonburnable'],[1,'V · Grass'],[2,'W · Grass / shrub'],[3,'X · Brush'],[4,'Y · Timber'],[5,'Z · Slash / blowdown']]){
       const row=document.createElement('div'),swatch=document.createElement('i');
       swatch.style.backgroundColor=`rgb(${metadata.colors[id].join(',')})`;row.append(swatch,document.createTextNode(label));box.append(row);
     }
-    const help=document.createElement('small');help.textContent='30 m source · Zoom in to place ignition. Uncolored areas have no fuel data. Nonburnable is a model classification.';box.append(help);
+    const help=document.createElement('small');help.textContent='30 m source · Zoom in to place ignition. Uncolored areas have no fuel data.';box.append(help);
     L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);return box;
   };
   function update(){if(checkbox.checked){layer.addTo(map);legend.addTo(map);}else{layer.remove();legend.remove();}}
