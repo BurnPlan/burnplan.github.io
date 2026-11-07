@@ -187,6 +187,11 @@ async function loadMapData() {
         layer.bindTooltip(feature.properties.name, { permanent: true, direction: 'center', className: 'county-label', interactive: false });
         layer.on('mouseover', () => { if (!state.drawing && !state.editing) layer.setStyle({ fillOpacity: 0.48, weight: 2 }); });
         layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.24, weight: 1 }));
+        layer.on('click', () => {
+          if (state.drawing || state.editing) return;
+          $('county-select').value = feature.properties.geoid;
+          map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+        });
       }
     }).addTo(map);
     const outlineLayer = L.geoJSON(state.outline, { style: { color: '#536948', weight: 2, fill: false }, interactive: false }).addTo(map);
