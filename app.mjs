@@ -267,6 +267,7 @@ async function rerunJob(job) {
   try {
     const {data,error}=await client.rpc('rerun_my_simulation',{p_job_id:job.id});
     if(error){
+      if(error.message?.includes('DAILY_SIMULATION_LIMIT_REACHED'))throw new Error('You have reached 20 simulation submissions today, including reruns. Try again after midnight Central Time.');
       if(['PGRST202','42883','42501'].includes(error.code))throw new Error('Rerun setup is required: run Website/app/supabase_rerun_simulations.sql in Supabase SQL Editor once.');
       throw new Error('Could not confirm the rerun. Refresh My simulations before retrying.');
     }
@@ -377,7 +378,9 @@ $('simulation-form').addEventListener('submit', async event => {
     $('simulation-name').value = '';
     notice('Simulation request saved and queued.'); await refreshJobs(); setView('jobs');
   } catch (error) {
-    if (error.message?.includes('SIMULATION_LIMIT_REACHED')) {
+    if (error.message?.includes('DAILY_SIMULATION_LIMIT_REACHED')) {
+      errorAt('submit-error', 'You have reached 20 simulation submissions today, including reruns. Try again after midnight Central Time. Deleting a simulation does not reset this daily limit.');
+    } else if (error.message?.includes('SIMULATION_LIMIT_REACHED')) {
       errorAt('submit-error', 'You can keep at most 5 simulations. Delete a completed or failed simulation in My simulations before submitting another.');
     } else if (error.message === 'SIMULATION_COUNT_UNAVAILABLE') {
       errorAt('submit-error', 'Could not check your simulation limit. Check your connection and try again. No request was submitted.');
