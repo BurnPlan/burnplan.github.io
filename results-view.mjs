@@ -1,6 +1,7 @@
 import { hourlyCharts } from './hourly-charts.mjs';
 import { createBurnSuggestions } from './burn-suggestions.mjs';
 import { rasterGrid,drawRaster } from './raster-map.mjs';
+import { customaryResults,customaryGrid } from './result-units.mjs';
 export function resultPath(owner,job,filename) {
   const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuid.test(owner)||!uuid.test(job)||typeof filename!=='string'||!filename.match(/^[A-Za-z0-9_.-]+$/)||filename.includes('..')) throw new Error('Invalid private result path.');
@@ -35,7 +36,7 @@ export function createResultsViewer(client) {
     async function getJSON(name){const response=await fetch(await signed(name),{signal});if(!response.ok)throw new Error('Result download failed.');return response.json();}
     try {
       if(job.result_path!==path('results.json'))throw new Error('This request has no supported result manifest.');
-      const result=await getJSON('results.json');if(current!==generation)return;
+      const result=customaryResults(await getJSON('results.json'));if(current!==generation)return;
       if(result.schema!==1||!Array.isArray(result.layers)||!result.summary)throw new Error('Unsupported result format.');
       result.layers=result.layers.filter(layer=>{
         const metric=layer.metric.split('/').pop();
@@ -133,13 +134,13 @@ export function createResultsViewer(client) {
           if(layer.metric.endsWith('/fire_type'))legend.append(node('small','Classes: 0 = unburned; 1 = surface fire; 2 = passive crown fire; 3 = active crown fire.'));
           feedback.textContent='Orange outline: simulated burned area. Green outline: domain. Red: ignition.';
           if(layer.values_file){
-            const grid=rasterGrid(await loadRaster(layer.values_file),layer.values_band);if(current!==generation||version!==selection)return;
+            const grid=customaryGrid(rasterGrid(await loadRaster(layer.values_file),layer.values_band),layer);if(current!==generation||version!==selection)return;
             if(grid.schema!==1||!Number.isInteger(grid.width)||!Number.isInteger(grid.height)||grid.width<=0||grid.height<=0||!Array.isArray(grid.values)||grid.values.length!==grid.width*grid.height||!Array.isArray(grid.transform)||grid.transform.length!==6||!grid.transform.every(Number.isFinite)||!grid.crs)throw new Error('Pixel values unavailable: invalid raster grid.');
             if(Math.abs(grid.transform[0]*grid.transform[4]-grid.transform[1]*grid.transform[3])<1e-12)throw new Error('Pixel values unavailable: invalid map coordinates.');
             projectPoint=window.proj4('EPSG:4326',grid.crs);hoverGrid=grid;hoverLayer=layer;
             const url=drawRaster(grid,layer,projectPoint);
             if(overlay)overlay.remove();overlay=L.imageOverlay(url,layer.bounds,{opacity:.85,interactive:false,pane:'resultRaster',className:'simulation-result-image'}).addTo(resultMap);
-            feedback.textContent+=' Hover over the map or tap to inspect a 30 m pixel.';
+            feedback.textContent+=' Hover over the map or tap to inspect a 98.43 ft pixel.';
           }else if(layer.file){
             const url=await signed(layer.file);if(current!==generation||version!==selection)return;
             if(overlay)overlay.remove();overlay=L.imageOverlay(url,layer.bounds,{opacity:.85,interactive:false,pane:'resultRaster',className:'simulation-result-image'}).addTo(resultMap);
@@ -149,7 +150,7 @@ export function createResultsViewer(client) {
       metric.onchange=()=>{time.replaceChildren();for(const layer of result.layers.filter(item=>item.metric===metric.value))time.add(new Option(timeLabel(layer.time),layer.time));updateLayer();};
       time.onchange=updateLayer;metric.onchange();
       if(result.hourly_domain?.length){
-        const tables=[['Fire spread',[['burned_acres','Cumulative burned (acres)'],['new_burned_acres','Newly burned (acres)'],['spread_rate','Simulated spread rate (m/min)'],['flame_length','Simulated flame length (m)'],['fireline_intensity','Simulated fireline intensity (kW/m)']]],
+        const tables=[['Fire spread',[['burned_acres','Cumulative burned (acres)'],['new_burned_acres','Newly burned (acres)'],['spread_rate','Simulated spread rate (ft/min)'],['flame_length','Simulated flame length (ft)'],['fireline_intensity','Simulated fireline intensity (Btu/ft/s)']]],
           ['Fire danger',[['BI','BI'],['ERC','ERC'],['SC','SC'],['IC','IC']]],
           ['Fuel moisture',[['dmc_1_hr','1 h (%)'],['dmc_10_hr','10 h (%)'],['dmc_100_hr','100 h (%)']]]];
         for(const [title,fields] of tables){
@@ -175,7 +176,7 @@ export function createResultsViewer(client) {
       if(result.hourly_weather?.length){
         const section=node('section',undefined,'result-data');section.append(node('h3','Hourly weather · Central Time'));
         section.append(node('p','Weather at the domain centroid’s nearest HRRR grid cell. Rainfall covers the hour ending at the listed time. Wind direction is the direction the wind comes from, clockwise from true north.','field-help'));
-        const fields=[['temperature_c','Temperature (°C)'],['rh_percent','Relative humidity (%)'],['rain_mm','Rainfall (mm)'],['solar_w_m2','Solar radiation (W/m²)'],['wind_m_s','Wind speed and direction (m/s)']];
+        const fields=[['temperature_f','Temperature (°F)'],['rh_percent','Relative humidity (%)'],['rain_in','Rainfall (in)'],['solar_btu_ft2_hr','Solar radiation (Btu/ft²/h)'],['wind_mph','Wind speed and direction (mph)']];
         section.append(hourlyCharts(result.hourly_weather,fields));addPanel('weather','Weather',section);
       }
       addPanel('burn-suggestion','Burn suggestion',createBurnSuggestions(result));

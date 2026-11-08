@@ -121,7 +121,7 @@ function updateReview() {
   }
   try {
     const p = readPeriod();
-    $('review-summary').textContent = `${(turf.area(state.domain) / 10000).toLocaleString(undefined, { maximumFractionDigits: 1 })} hectares · ${state.countyNames.join(', ')}\nIgnition: ${ignitionDescription(state.ignition,turf)}\n${formatTime(p.start)}\n→ ${formatTime(p.end)}`;
+    $('review-summary').textContent = `${(turf.area(state.domain) / 4046.8564224).toLocaleString(undefined, { maximumFractionDigits: 1 })} acres · ${state.countyNames.join(', ')}\nIgnition: ${ignitionDescription(state.ignition,turf)}\n${formatTime(p.start)}\n→ ${formatTime(p.end)}`;
   } catch { $('review-summary').textContent = 'Your domain is ready. Check the simulation period above.'; }
 }
 

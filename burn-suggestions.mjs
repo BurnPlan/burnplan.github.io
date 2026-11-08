@@ -4,15 +4,15 @@ const fmt=value=>numeric(value)===null?'—':Number(value).toLocaleString(undefi
 const time=value=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(new Date(value));
 const el=(tag,text,cls)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;};
 export const prescriptionFields=[
-  ['tempMin','Minimum temperature (°C)','temperature_c','min'],['tempMax','Maximum temperature (°C)','temperature_c','max'],
+  ['tempMin','Minimum temperature (°F)','temperature_f','min'],['tempMax','Maximum temperature (°F)','temperature_f','max'],
   ['rhMin','Minimum RH (%)','rh_percent','min'],['rhMax','Maximum RH (%)','rh_percent','max'],
-  ['windMin','Minimum wind (m/s)','wind_m_s','min'],['windMax','Maximum wind (m/s)','wind_m_s','max'],
+  ['windMin','Minimum wind (mph)','wind_mph','min'],['windMax','Maximum wind (mph)','wind_mph','max'],
   ['moistMin','Minimum 1-hour moisture (%)','dmc_1_hr','min'],['moistMax','Maximum 1-hour moisture (%)','dmc_1_hr','max'],
   ['moist10Min','Minimum 10-hour moisture (%)','dmc_10_hr','min'],['moist10Max','Maximum 10-hour moisture (%)','dmc_10_hr','max']
 ];
 // OK-FIRE beginner screening guidance, NOT universal NWCG limits.
-// Exact mph-to-m/s and Fahrenheit-to-Celsius conversions are retained.
-export const OKFIRE_DEFAULTS={tempMin:(35-32)*5/9,rhMin:40,rhMax:80,windMin:4*.44704,windMax:15*.44704,moistMin:8,moistMax:20,moist10Min:7,moist10Max:15};
+// Limits and hourly weather are in U.S. customary units.
+export const OKFIRE_DEFAULTS={tempMin:35,rhMin:40,rhMax:80,windMin:4,windMax:15,moistMin:8,moistMax:20,moist10Min:7,moist10Max:15};
 export function effectiveLimits(limits={},useDefaults=false){
   const effective=useDefaults?{...OKFIRE_DEFAULTS}:{};
   for(const [key] of prescriptionFields)if(numeric(limits[key])!==null)effective[key]=Number(limits[key]);
@@ -26,7 +26,7 @@ export function assessHours(result,limits={},useDefaults=false){
     const merged={...w,...row},outside=[],missing=[],outsideFields=[];
     const entered=prescriptionFields.filter(([key])=>numeric(limits[key])!==null);
     for(const [key,label,field,kind] of entered){const value=numeric(merged[field]);if(value===null)missing.push(label);else if(kind==='min'?value<Number(limits[key]):value>Number(limits[key])){outside.push(`${label}: ${fmt(value)} versus ${fmt(limits[key])}`);outsideFields.push(field);}}
-    const required=['temperature_c','rh_percent','wind_m_s','dmc_1_hr','dmc_10_hr'];
+    const required=['temperature_f','rh_percent','wind_mph','dmc_1_hr','dmc_10_hr'];
     const complete=required.every(key=>numeric(merged[key])!==null);
     const covered=new Set(entered.map(([,label,field])=>field));
     const status=outside.length?'Outside entered limits':missing.length||!complete||entered.length&&covered.size<required.length?'Incomplete comparison':entered.length?'Within entered limits':'Prescription not entered';
@@ -44,14 +44,14 @@ export function createBurnSuggestions(result){
   const summary=el('div',undefined,'burn-outlook-summary');
   const source=el('label',undefined,'burn-default-toggle'),useDefaults=el('input');useDefaults.type='checkbox';useDefaults.checked=true;
   source.append(useDefaults,document.createTextNode(' Use OK-FIRE beginner screening ranges when a limit is blank'));
-  const sourceNote=el('p','Reference ranges: RH 40–80%; 10 m wind 4–15 mph (1.79–6.71 m/s); 1 h dead moisture 8–20%; 10 h dead moisture 7–15%; temperature ≥35°F (1.67°C), with no reference upper temperature limit. Exact conversions are used. These are OK-FIRE screening ranges, not NWCG limits.','field-help');
+  const sourceNote=el('p','Reference ranges: RH 40–80%; 33 ft wind 4–15 mph; 1 h dead moisture 8–20%; 10 h dead moisture 7–15%; temperature ≥35°F, with no reference upper temperature limit. These are OK-FIRE screening ranges, not NWCG limits.','field-help');
   const details=el('details',undefined,'burn-prescription');details.append(el('summary','Compare with limits from your burn prescription'));
   details.append(el('p','Your numbers override the reference ranges. Only temperature, RH, wind speed and 1 h / 10 h dead-fuel moisture determine this window.','field-help'));
   const inputs=el('div',undefined,'burn-limit-rows');const controls={};
-  for(const [field,title] of [['temperature_c','Temperature (°C)'],['rh_percent','Relative humidity (%)'],['wind_m_s','Wind speed (m/s)'],['dmc_1_hr','1-hour dead-fuel moisture (%)'],['dmc_10_hr','10-hour dead-fuel moisture (%)']]){
+  for(const [field,title] of [['temperature_f','Temperature (°F)'],['rh_percent','Relative humidity (%)'],['wind_mph','Wind speed (mph)'],['dmc_1_hr','1-hour dead-fuel moisture (%)'],['dmc_10_hr','10-hour dead-fuel moisture (%)']]){
     const row=el('div',undefined,'burn-limit-row');row.append(el('strong',title));
     for(const [key,label,,kind] of prescriptionFields.filter(entry=>entry[2]===field)){
-      const wrapper=el('label',kind==='min'?'Minimum':'Maximum');const input=el('input');input.type='number';input.min=field==='temperature_c'?'-80':'0';input.step='any';input.placeholder=key in OKFIRE_DEFAULTS?`Reference: ${fmt(OKFIRE_DEFAULTS[key])}`:'Site-specific limit';input.setAttribute('aria-label',label);if(field==='rh_percent'||field.startsWith('dmc_'))input.max='100';wrapper.append(input);controls[key]=input;row.append(wrapper);
+      const wrapper=el('label',kind==='min'?'Minimum':'Maximum');const input=el('input');input.type='number';input.min=field==='temperature_f'?'-80':'0';input.step='any';input.placeholder=key in OKFIRE_DEFAULTS?`Reference: ${fmt(OKFIRE_DEFAULTS[key])}`:'Site-specific limit';input.setAttribute('aria-label',label);if(field==='rh_percent'||field.startsWith('dmc_'))input.max='100';wrapper.append(input);controls[key]=input;row.append(wrapper);
     }
     inputs.append(row);
   }
@@ -69,8 +69,8 @@ export function createBurnSuggestions(result){
     for(const [label,count] of [['Inside window',hours.filter(row=>row.inWindow).length],['Outside limits',hours.filter(row=>row.status==='Outside entered limits').length],['Incomplete / unassessed',hours.filter(row=>!row.inWindow&&row.status!=='Outside entered limits').length]]){const card=el('div');card.append(el('small',label),el('strong',String(count)));summary.append(card);}
     const entered=Object.keys(effective).length;
     report.textContent=entered?'Green: all five variables meet the selected limits. Red: outside a limit, missing data, or incomplete limits.':'No limits entered or enabled; hours are red because they cannot be assessed.';
-    const table=el('table'),head=el('tr');for(const title of ['Time (Central)','Window','Temperature (°C)','RH (%)','Wind (m/s)','1 h moisture (%)','10 h moisture (%)','Spread rate (m/min)','Flame length (m)','BI'])head.append(el('th',title));const thead=el('thead');thead.append(head);table.append(thead);
-    const body=el('tbody');for(const row of hours){const tr=el('tr',undefined,row.inWindow?'burn-window-inside':'burn-window-outside');tr.append(el('td',time(row.valid_time_utc)),el('td',row.inWindow?'Within window':row.status==='Outside entered limits'?'Outside window':'Not fully assessed'));for(const key of ['temperature_c','rh_percent','wind_m_s','dmc_1_hr','dmc_10_hr','spread_rate','flame_length','BI']){const cell=el('td',fmt(row[key]));if(row.outsideFields.includes(key)){cell.className='burn-value-outside';cell.title='Outside the selected limits';cell.setAttribute('aria-label',`${fmt(row[key])}, outside the selected limits`);}tr.append(cell);}body.append(tr);}table.append(body);wrapper.replaceChildren(table);
+    const table=el('table'),head=el('tr');for(const title of ['Time (Central)','Window','Temperature (°F)','RH (%)','Wind (mph)','1 h moisture (%)','10 h moisture (%)','Spread rate (ft/min)','Flame length (ft)','BI'])head.append(el('th',title));const thead=el('thead');thead.append(head);table.append(thead);
+    const body=el('tbody');for(const row of hours){const tr=el('tr',undefined,row.inWindow?'burn-window-inside':'burn-window-outside');tr.append(el('td',time(row.valid_time_utc)),el('td',row.inWindow?'Within window':row.status==='Outside entered limits'?'Outside window':'Not fully assessed'));for(const key of ['temperature_f','rh_percent','wind_mph','dmc_1_hr','dmc_10_hr','spread_rate','flame_length','BI']){const cell=el('td',fmt(row[key]));if(row.outsideFields.includes(key)){cell.className='burn-value-outside';cell.title='Outside the selected limits';cell.setAttribute('aria-label',`${fmt(row[key])}, outside the selected limits`);}tr.append(cell);}body.append(tr);}table.append(body);wrapper.replaceChildren(table);
   }
   for(const input of Object.values(controls))input.addEventListener('input',update);
   useDefaults.addEventListener('change',update);

@@ -22,14 +22,14 @@ export function hourlyCharts(rows,fields){
     const card=document.createElement('figure');card.className='hourly-chart';
     const heading=document.createElement('figcaption');heading.textContent=label;card.append(heading);
     const points=chartSeries(rows,key),valid=points.filter(p=>p.value!==null);
-    const windRows=key==='wind_m_s'?new Map(rows.map(row=>[Date.parse(row.valid_time_utc),row])):null;
+    const windRows=key==='wind_mph'?new Map(rows.map(row=>[Date.parse(row.valid_time_utc),row])):null;
     const windAt=p=>windRows?windDirection(windRows.get(p.time)?.wind_from_degrees,p.value):null;
     if(!valid.length){const empty=document.createElement('p');empty.textContent='No values for this period.';card.append(empty);grid.append(card);continue;}
     const width=600,height=250,left=70,right=18,top=18,bottom=48,plotW=width-left-right,plotH=height-top-bottom;
     const first=points[0].time,last=points.at(-1).time;
     let low=Math.min(...valid.map(p=>p.value)),high=Math.max(...valid.map(p=>p.value));
     if(high===low){const padding=Math.max(Math.abs(low)*.1,1);low-=padding;high+=padding;}
-    if(key==='rain_mm'){low=0;high=Math.max(high,1);}
+    if(key==='rain_in'){low=0;high=Math.max(high,0.01);}
     const x=t=>first===last?left+plotW/2:left+(t-first)/(last-first)*plotW;
     const y=v=>top+(high-v)/(high-low)*plotH;
     const svg=element('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':`${label}; hourly values in Central Time. Focus and use left or right arrow keys for values.`,tabindex:0});
@@ -54,7 +54,7 @@ export function hourlyCharts(rows,fields){
       for(const p of valid){
         const direction=windAt(p);if(!direction||direction.calm)continue;
         const arrow=element('g',{transform:`translate(${x(p.time)} ${y(p.value)}) rotate(${direction.rotation})`});
-        arrow.append(element('path',{d:'M0 10 L0 -10 M-4 -4 L0 -10 L4 -4',fill:'none',stroke:'#fffef9','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'}),element('path',{d:'M0 10 L0 -10 M-4 -4 L0 -10 L4 -4',fill:'none',stroke:'#315b40','stroke-width':2,'stroke-linecap':'round','stroke-linejoin':'round'}),element('title',{},`${time(p.time)} · ${format(p.value)} m/s · From ${direction.from}`));svg.append(arrow);
+        arrow.append(element('path',{d:'M0 10 L0 -10 M-4 -4 L0 -10 L4 -4',fill:'none',stroke:'#fffef9','stroke-width':5,'stroke-linecap':'round','stroke-linejoin':'round'}),element('path',{d:'M0 10 L0 -10 M-4 -4 L0 -10 L4 -4',fill:'none',stroke:'#315b40','stroke-width':2,'stroke-linecap':'round','stroke-linejoin':'round'}),element('title',{},`${time(p.time)} · ${format(p.value)} mph · From ${direction.from}`));svg.append(arrow);
       }
     }
     const guide=element('line',{x1:left,x2:left,y1:top,y2:height-bottom,stroke:'#496b4f','stroke-dasharray':'4 4',visibility:'hidden'});svg.append(guide);
